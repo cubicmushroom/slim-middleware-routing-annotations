@@ -14,7 +14,7 @@ use CubicMushroom\Slim\Middleware\Exception\MissingOptionException;
 use CubicMushroom\Slim\ServiceManager\ServiceManager;
 use Slim\Middleware;
 
-class RoutingAnnotations extends Middleware
+class RoutingAnnotationsMiddleware extends Middleware
 {
 
     /**
