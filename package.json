@@ -1,0 +1,33 @@
+{
+  "name": "slim-middleware-routing-annotations",
+  "version": "1.0.0",
+  "description": "Slim Middleware to add routes from class annotations",
+  "main": "gulfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cubicmushroom/slim-middleware-routing-annotations.git"
+  },
+  "keywords": [
+    "slim-framework",
+    "middleware",
+    "routing",
+    "annotations"
+  ],
+  "author": "Toby Griffiths <toby@cubicmushroom.co.uk>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cubicmushroom/slim-middleware-routing-annotations/issues"
+  },
+  "homepage": "https://github.com/cubicmushroom/slim-middleware-routing-annotations",
+  "devDependencies": {
+    "gulp": "^3.8.11",
+    "gulp-codeception": "^0.5.0",
+    "gulp-notify": "^2.2.0",
+    "gulp-shell": "^0.3.0",
+    "gulp-watch": "^4.1.1",
+    "lodash": "^3.1.0"
+  }
+}
