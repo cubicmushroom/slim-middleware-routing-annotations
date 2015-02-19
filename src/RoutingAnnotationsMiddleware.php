@@ -8,7 +8,8 @@
 
 namespace CubicMushroom\Slim\Middleware;
 
-use CubicMushroom\Annotations\Routing\Parser\DocumentationAnnotationParser;
+use CubicMushroom\Annotations\Routing\Annotation\Route as RouteAnnotation;
+use CubicMushroom\Annotations\Routing\Parser\DocumentationAnnotationParser as Parser;
 use CubicMushroom\Exceptions\Exception\Defaults\MissingExceptionMessageException;
 use CubicMushroom\Slim\Middleware\Exception\MissingOptionException;
 use CubicMushroom\Slim\ServiceManager\ServiceManager;
@@ -23,12 +24,7 @@ class RoutingAnnotationsMiddleware extends Middleware
     protected $serviceManager;
 
     /**
-     * @var array
-     */
-    protected $classes;
-
-    /**
-     * @var DocumentationAnnotationParser
+     * @var string|Parser
      */
     protected $annotationParser;
 
@@ -36,39 +32,16 @@ class RoutingAnnotationsMiddleware extends Middleware
     /**
      * Stores the options
      *
-     * @param DocumentationAnnotationParser|string $annotationParser Object used to parse class annotations, or a string
+     * @param Parser|string         $annotationParser                Object used to parse class annotations, or a string
      *                                                               for the the parser service.
-     *                                                               If you pass a service string name you must also
-     *                                                               pass $options['serviceManager']
-     * @param array                                $options          Array of options. Possible options...
-     *                                                               - 'serviceManager' string [optional] String used
-     *                                                               to
-     *                                                               register service manager as service
-     *                                                               You must supply this or 'classes'
-     *                                                               - 'classes'        array  [optional] Array of
-     *                                                               classes to parse You must supply this or
-     *                                                               'serviceManager'
+     * @param string|ServiceManager $serviceManager                  Service manager service name or object
      *
      * @throws MissingExceptionMessageException
      */
-    function __construct(DocumentationAnnotationParser $annotationParser, array $options)
+    function __construct($annotationParser, $serviceManager)
     {
         $this->setAnnotationParser($annotationParser);
-
-        if (empty($options['serviceManager']) && empty($options['classes'])) {
-            throw MissingExceptionMessageException::build(
-                ['message' => 'Missing \'classes\' and \'serviceManager\' option.  One of these is required to work.'],
-                ['missingOptions' => ['classes', 'serviceManager']]
-            );
-        }
-
-        if (!empty($options['serviceManager'])) {
-            $this->setServiceManager($options['serviceManager']);
-        }
-
-        if (!empty($options['classes'])) {
-            $this->setClasses($options['classes']);
-        }
+        $this->setServiceManager($serviceManager);
     }
 
 
@@ -92,9 +65,18 @@ class RoutingAnnotationsMiddleware extends Middleware
     protected function addRoutes()
     {
         $classes     = $this->getRouteClasses();
-        $annotations = $this->getAnnotationParser()->parse($classes);
+        $annotations = $this->getAnnotationParser()->parse(array_keys($classes));
 
-        return $annotations;
+        foreach ($annotations as $class => $methodAnnotations) {
+            $service = $classes[$class];
+            foreach ($methodAnnotations as $method => $typeAnnotations) {
+                foreach ($typeAnnotations as $annotationType => $annotationsArray) {
+                    foreach ($annotationsArray as $annotation) {
+                        $this->addRoute($annotation, $service, $method, $class);
+                    }
+                }
+            }
+        }
     }
 
 
@@ -107,29 +89,10 @@ class RoutingAnnotationsMiddleware extends Middleware
     {
         $routingClasses = [];
 
-        try {
-            $serviceManager = $this->getServiceManager();
-        } catch (MissingOptionException $e) {
-        }
-        if (!empty($serviceManager)) {
-            if (true === $serviceManager) {
-                $sm = $this->app->container->get('@' . ServiceManager::DEFAULT_SERVICE_NAME);
-            } else {
-                $sm = $this->app->container->get($serviceManager);
-            }
-            /** @var ServiceManager $sm */
-
-            $routingServices = $sm->getTaggedServices('routes');
-            foreach ($routingServices as $routingService) {
-                $routingClasses[] = $routingService->getClass();
-            }
-        }
-
-        $classes = $this->getClasses();
-        if (!empty($classes)) {
-            foreach ($classes as $class) {
-                $routingClasses[] = $class;
-            }
+        $serviceManager  = $this->getServiceManager();
+        $routingServices = $serviceManager->getTaggedServices('routes');
+        foreach ($routingServices as $serviceName => $routingService) {
+            $routingClasses[$routingService->getClass()] = $serviceName;
         }
 
         return $routingClasses;
@@ -147,12 +110,8 @@ class RoutingAnnotationsMiddleware extends Middleware
      */
     public function getServiceManager()
     {
-        if (empty($this->serviceManager)) {
-            throw MissingOptionException::build([], ['missingOptions' => ['serviceManager']]);
-        }
-
         if (is_string($this->serviceManager)) {
-            $this->serviceManager = $this->app->container->get($this->serviceManager);
+            $this->serviceManager = $this->app->container->get(ServiceManager::getServiceName($this->serviceManager));
         }
 
         return $this->serviceManager;
@@ -169,25 +128,7 @@ class RoutingAnnotationsMiddleware extends Middleware
 
 
     /**
-     * @return array
-     */
-    public function getClasses()
-    {
-        return $this->classes;
-    }
-
-
-    /**
-     * @param array $classes
-     */
-    public function setClasses($classes)
-    {
-        $this->classes = $classes;
-    }
-
-
-    /**
-     * @return DocumentationAnnotationParser
+     * @return Parser
      */
     public function getAnnotationParser()
     {
@@ -201,10 +142,51 @@ class RoutingAnnotationsMiddleware extends Middleware
 
 
     /**
-     * @param DocumentationAnnotationParser|string $annotationParser
+     * @param Parser|string $annotationParser
      */
     public function setAnnotationParser($annotationParser)
     {
         $this->annotationParser = $annotationParser;
+    }
+
+
+    /**
+     * @param RouteAnnotation $annotation
+     * @param                 $service
+     * @param                 $method
+     * @param                 $class
+     *
+     * @throws MissingExceptionMessageException
+     */
+    protected function addRoute(RouteAnnotation $annotation, $service, $method, $class)
+    {
+        $serviceManager = $this->getServiceManager();
+
+        $route = $this->app->map(
+            $annotation->getPattern(),
+            function () use ($serviceManager, $service, $method) {
+                $service = $serviceManager->getService($service);
+
+                return call_user_func_array([$service, $method], func_get_args());
+            }
+        );
+
+        $methods = $annotation->getMethods();
+        if (empty($methods)) {
+            throw MissingExceptionMessageException::build(
+                [],
+                [
+                    'class'      => $class,
+                    'method'     => $method,
+                    'annotation' => $annotation
+                ]
+            );
+        }
+        call_user_func_array([$route, 'via'], $methods);
+
+        $routeName = $annotation->getName();
+        if (!empty($routeName)) {
+            $route->name($routeName);
+        }
     }
 }
