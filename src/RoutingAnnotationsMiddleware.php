@@ -126,6 +126,8 @@ class RoutingAnnotationsMiddleware extends Middleware
                 $routingClasses[] = $class;
             }
         }
+
+        return $routingClasses;
     }
 
 
