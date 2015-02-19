@@ -30,19 +30,19 @@ class MissingOptionException extends AbstractException
     // -----------------------------------------------------------------------------------------------------------------
 
     /**
-     * @return string
+     * @return array
      */
-    public function getMissingOption()
+    public function getMissingOptions()
     {
-        return $this->missingOption;
+        return $this->missingOptions;
     }
 
 
     /**
-     * @param string $missingOption
+     * @param array $missingOptions
      */
-    public function setMissingOption($missingOption)
+    public function setMissingOptions($missingOptions)
     {
-        $this->missingOption = $missingOption;
+        $this->missingOptions = $missingOptions;
     }
 }
