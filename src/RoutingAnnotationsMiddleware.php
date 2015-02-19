@@ -18,7 +18,7 @@ class RoutingAnnotationsMiddleware extends Middleware
 {
 
     /**
-     * @var string
+     * @var string|ServiceManager
      */
     protected $serviceManager;
 
@@ -92,8 +92,6 @@ class RoutingAnnotationsMiddleware extends Middleware
         $classes     = $this->getRouteClasses();
         $annotations = $this->getAnnotationParser()->parse($classes);
 
-
-
         return $annotations;
     }
 
@@ -146,7 +144,11 @@ class RoutingAnnotationsMiddleware extends Middleware
             throw MissingOptionException::build([], ['options' => ['serviceManager']]);
         }
 
-        return $this->app->container->get($this->serviceManager);
+        if (is_string($this->serviceManager)) {
+            $this->serviceManager = $this->app->container->get($this->serviceManager);
+        }
+
+        return $this->serviceManager;
     }
 
 
