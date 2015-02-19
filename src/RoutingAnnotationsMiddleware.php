@@ -53,6 +53,8 @@ class RoutingAnnotationsMiddleware extends Middleware
      */
     function __construct(DocumentationAnnotationParser $annotationParser, array $options)
     {
+        $this->setAnnotationParser($annotationParser);
+
         if (empty($options['serviceManager']) && empty($options['classes'])) {
             throw MissingExceptionMessageException::build(
                 ['message' => 'Missing \'classes\' and \'serviceManager\' option.  One of these is required to work.'],
@@ -105,7 +107,10 @@ class RoutingAnnotationsMiddleware extends Middleware
     {
         $routingClasses = [];
 
-        $serviceManager = $this->getServiceManager();
+        try {
+            $serviceManager = $this->getServiceManager();
+        } catch (MissingOptionException $e) {
+        }
         if (!empty($serviceManager)) {
             if (true === $serviceManager) {
                 $sm = $this->app->container->get('@' . ServiceManager::DEFAULT_SERVICE_NAME);
