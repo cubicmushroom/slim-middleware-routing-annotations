@@ -141,7 +141,7 @@ class RoutingAnnotationsMiddleware extends Middleware
     public function getServiceManager()
     {
         if (empty($this->serviceManager)) {
-            throw MissingOptionException::build([], ['options' => ['serviceManager']]);
+            throw MissingOptionException::build([], ['missingOptions' => ['serviceManager']]);
         }
 
         if (is_string($this->serviceManager)) {
