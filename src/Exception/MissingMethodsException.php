@@ -23,6 +23,11 @@ class MissingMethodsException extends AbstractException
     /**
      * @var string
      */
+    protected $service;
+
+    /**
+     * @var string
+     */
     protected $class;
 
     /**
@@ -41,7 +46,7 @@ class MissingMethodsException extends AbstractException
      */
     protected static function getDefaultMessage(array $additionalProperties)
     {
-        return "No 'methods' property defined on the {$additionalProperties['class']}::" .
+        return "No 'methods' property defined on the {$additionalProperties['service']}::" .
                "{$additionalProperties['method']}() route";
     }
 
@@ -49,6 +54,24 @@ class MissingMethodsException extends AbstractException
     // -----------------------------------------------------------------------------------------------------------------
     // Getters and Setters
     // -----------------------------------------------------------------------------------------------------------------
+
+    /**
+     * @return string
+     */
+    public function getService()
+    {
+        return $this->service;
+    }
+
+
+    /**
+     * @param string $service
+     */
+    public function setService($service)
+    {
+        $this->service = $service;
+    }
+
 
     /**
      * @return string

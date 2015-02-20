@@ -152,14 +152,13 @@ class RoutingAnnotationsMiddleware extends Middleware
 
 
     /**
-     * @param RouteAnnotation $annotation
-     * @param                 $service
-     * @param                 $method
-     * @param                 $class
+     * @param RouteAnnotation $annotation Annotation object containing route details
+     * @param string          $service    Name of the service that will handle this request
+     * @param string          $method     Name of the method within the service that will handle the request
      *
-     * @throws MissingExceptionMessageException
+     * @throws MissingMethodsException if the 'methods' part of the annotation is missing
      */
-    protected function addRoute(RouteAnnotation $annotation, $service, $method, $class)
+    protected function addRoute(RouteAnnotation $annotation, $service, $method)
     {
         $serviceManager = $this->getServiceManager();
 
@@ -177,7 +176,7 @@ class RoutingAnnotationsMiddleware extends Middleware
             throw MissingMethodsException::build(
                 [],
                 [
-                    'class'      => $class,
+                    'service'    => $service,
                     'method'     => $method,
                     'annotation' => $annotation
                 ]
