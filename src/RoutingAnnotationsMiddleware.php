@@ -13,6 +13,7 @@ use CubicMushroom\Annotations\Routing\Parser\DocumentationAnnotationParser as Pa
 use CubicMushroom\Exceptions\Exception\Defaults\MissingExceptionMessageException;
 use CubicMushroom\Slim\Middleware\Exception\MissingMethodsException;
 use CubicMushroom\Slim\Middleware\Exception\MissingOptionException;
+use CubicMushroom\Slim\Middleware\Exception\MissingServiceManagerException;
 use CubicMushroom\Slim\ServiceManager\ServiceManager;
 use Slim\Middleware;
 
@@ -85,12 +86,19 @@ class RoutingAnnotationsMiddleware extends Middleware
      * Gets the classes with route annotations
      *
      * @return array
+     *
+     * @throws MissingServiceManagerException if the ServiceManager service is not available
      */
     protected function getRouteClasses()
     {
         $routingClasses = [];
 
         $serviceManager  = $this->getServiceManager();
+
+        if (empty($serviceManager)) {
+            throw MissingServiceManagerException::build();
+        }
+
         $routingServices = $serviceManager->getTaggedServices('routes');
         foreach ($routingServices as $serviceName => $routingService) {
             $routingClasses[$routingService->getClass()] = $serviceName;
