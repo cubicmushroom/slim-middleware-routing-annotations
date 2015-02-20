@@ -11,6 +11,7 @@ namespace CubicMushroom\Slim\Middleware;
 use CubicMushroom\Annotations\Routing\Annotation\Route as RouteAnnotation;
 use CubicMushroom\Annotations\Routing\Parser\DocumentationAnnotationParser as Parser;
 use CubicMushroom\Exceptions\Exception\Defaults\MissingExceptionMessageException;
+use CubicMushroom\Slim\Middleware\Exception\MissingMethodsException;
 use CubicMushroom\Slim\Middleware\Exception\MissingOptionException;
 use CubicMushroom\Slim\ServiceManager\ServiceManager;
 use Slim\Middleware;
@@ -173,7 +174,7 @@ class RoutingAnnotationsMiddleware extends Middleware
 
         $methods = $annotation->getMethods();
         if (empty($methods)) {
-            throw MissingExceptionMessageException::build(
+            throw MissingMethodsException::build(
                 [],
                 [
                     'class'      => $class,
