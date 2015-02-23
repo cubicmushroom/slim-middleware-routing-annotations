@@ -1,26 +1,27 @@
 {
-  "name": "cubicmushroom/slim-middleware-routing-annotations",
-  "description": "Slim Middleware to add routes from class annotations",
-  "license": "MIT",
-  "authors": [
-    {
-      "name": "Toby Griffiths",
-      "email": "toby@cubicmushroom.co.uk"
+    "name": "cubicmushroom/slim-middleware-routing-annotations",
+    "version": "1.0.0",
+    "description": "Slim Middleware to add routes from class annotations",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Toby Griffiths",
+            "email": "toby@cubicmushroom.co.uk"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "slim/slim": "~2.5",
+        "cubicmushroom/exceptions": "~1.0",
+        "cubicmushroom/routing-annotations": "~1.0",
+        "cubicmushroom/slim-service-manager": "~1.3"
+    },
+    "require-dev": {
+        "codeception/codeception": "2.0.10.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "CubicMushroom\\Slim\\Middleware\\": "src/"
+        }
     }
-  ],
-  "minimum-stability": "stable",
-  "require": {
-    "slim/slim": "~2.5",
-    "cubicmushroom/exceptions": "~1.0",
-    "cubicmushroom/routing-annotations": "~1.0",
-    "cubicmushroom/slim-service-manager": "~1.3"
-  },
-  "require-dev": {
-    "codeception/codeception": "2.0.10.1"
-  },
-  "autoload": {
-    "psr-4": {
-      "CubicMushroom\\Slim\\Middleware\\": "src/"
-    }
-  }
 }
