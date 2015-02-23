@@ -9,6 +9,7 @@
 namespace CubicMushroom\Slim\Middleware;
 
 use CubicMushroom\Annotations\Routing\Annotation\Route as RouteAnnotation;
+use CubicMushroom\Annotations\Routing\Annotation\Route;
 use CubicMushroom\Annotations\Routing\Parser\DocumentationAnnotationParser as Parser;
 use CubicMushroom\Exceptions\Exception\Defaults\MissingExceptionMessageException;
 use CubicMushroom\Slim\Middleware\Exception\MissingMethodsException;
@@ -74,7 +75,9 @@ class RoutingAnnotationsMiddleware extends Middleware
             foreach ($methodAnnotations as $method => $typeAnnotations) {
                 foreach ($typeAnnotations as $annotationType => $annotationsArray) {
                     foreach ($annotationsArray as $annotation) {
-                        $this->addRoute($annotation, $service, $method, $class);
+                        if ($annotation instanceof Route) {
+                            $this->addRoute($annotation, $service, $method, $class);
+                        }
                     }
                 }
             }
