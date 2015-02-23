@@ -1,6 +1,6 @@
 {
     "name": "cubicmushroom/slim-middleware-routing-annotations",
-    "version": "1.0.0",
+    "version": "0.1.0",
     "description": "Slim Middleware to add routes from class annotations",
     "license": "MIT",
     "authors": [
